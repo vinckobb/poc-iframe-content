@@ -1,0 +1,64 @@
+@use '@css-styles/common' as mixins;
+@use 'externalStyle';
+@use 'scss/fonts';
+@use 'scss/app';
+
+// ---------------------- COMMON ----------------------
+
+@include mixins.css-reset;
+
+html
+{
+    height: 100%;
+}
+
+body
+{
+    overflow: hidden;
+    height: 100%;
+}
+
+// ---------------------- SPLASH SCREEN ----------------------
+
+.loading-indicator
+{
+    background-color: rgba(0, 0, 0, 0.3);
+    height: 100%;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 23456;
+    opacity: 1;
+
+    & > div
+    {
+        border: 4px solid #eee;
+        border-bottom: none;
+        border-top-left-radius: 48px;
+        border-top-right-radius: 48px;
+        height: 24px;
+        margin-left: auto;
+        margin-right: auto;
+        position: relative;
+        top: 50%;
+        width: 48px;
+        animation-name: rotate-loading;
+        animation-duration: 450ms;
+        animation-iteration-count: infinite;
+        animation-timing-function: linear;
+        transform-origin: calc(50%) calc(50% + 12px);
+    }
+}
+
+@keyframes rotate-loading
+{
+    0%
+    {
+        transform: rotate(0deg);
+    }
+    100%
+    {
+        transform: rotate(360deg);
+    }
+}

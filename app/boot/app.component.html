@@ -1,0 +1,29 @@
+<progress-indicator class="fullscreen"/>
+<internal-server-error class="fullscreen"/>
+<global-notifications class="fullscreen"/>
+<hotkeys-cheatsheet class="fullscreen"/>
+
+<main-menu class="page-header full-background"/>
+
+<div class="full page-content page">
+    <router-outlet class="hidden"/>
+</div>
+
+<div class="page-footer extra-small-text text-center">GUI version: {{guiVersion}}</div>
+
+@if(consoleVisible())
+{
+    <console class="fullscreen"/>
+}
+
+<!-- @if(!initialized)
+{
+    <div class="loading-indicator">
+        <div class="loading-header">
+            <div class="loading-title">APP</div>
+        </div>
+
+        <div class="loading-card"></div>
+        <div class="loading-spinner"></div>
+    </div>
+} -->

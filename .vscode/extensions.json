@@ -1,0 +1,15 @@
+{
+	// See http://go.microsoft.com/fwlink/?LinkId=827846
+	// for the documentation about the extensions.json format
+	"recommendations": [
+		"angular.ng-template",
+		"eamodio.gitlens",
+		"ecmel.vscode-html-css",
+		"gruntfuggly.todo-tree",
+		"vscode-icons-team.vscode-icons",
+		"dbaeumer.vscode-eslint",
+		"bierner.markdown-preview-github-styles",
+		"mhutchie.git-graph",
+		"ms-edgedevtools.vscode-edge-devtools"
+	]
+}

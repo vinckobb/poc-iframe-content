@@ -1,0 +1,92 @@
+@use '@css-styles/common';
+
+@mixin css
+{
+    app
+    {
+        display: grid;
+        height: 100vh;
+        grid-template-columns: [fullscreen-start] minmax(var(--page-side-width), 1fr) [content-start] minmax(0, var(--page-content-width)) [content-end] minmax(var(--page-side-width), 1fr) [fullscreen-end];
+        grid-template-rows: [fullscreen-start header-start] auto [header-end content-start] 1fr [content-end footer-start] auto [footer-end fullscreen-end];
+    
+        .page-header
+        {
+            grid-row: header;
+            grid-column: content;
+        }
+    
+        .page-footer
+        {
+            grid-row: footer;
+            grid-column: content;
+        }
+    
+        .page
+        {
+            grid-row: content;
+            min-height: 0;
+        }
+
+        .page-content
+        {
+            grid-column: content;
+            min-width: 0;
+        }
+
+        .fullscreen
+        {
+            grid-row: fullscreen;
+            grid-column: fullscreen;
+        }
+
+        .page-header,
+        .page-footer,
+        .page-content
+        {
+            &.full,
+            &.full-background
+            {
+                display: grid;
+                grid-template-columns: subgrid;
+                grid-column: fullscreen;
+            }
+    
+            &.full-background
+            {
+                &>*
+                {
+                    grid-column: content;
+                }
+            }
+        }
+
+        router-outlet+*,
+        router-outlet+*+*
+        {
+            @extend %thin-scrollbar;
+
+            grid-column: fullscreen;
+
+            display: grid;
+            grid-template-columns: subgrid;
+            overflow-y: hidden;
+
+            &.scrollable
+            {
+                overflow-y: scroll;
+            }
+
+            &.page-content
+            {
+                display: flex;
+                flex-direction: column;
+            }
+
+            &.fullscreen-content
+            {
+                display: flex;
+                flex-direction: column;
+            }
+        }
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "login": "mock-user",
+    "roles": 
+    [
+        "ROLE_DEVEL",
+        "ROLE_USER",
+        "ROLE_ADMIN"
+    ]
+}

@@ -1,0 +1,30 @@
+:host
+{
+    display: flex;
+    flex-direction: row;
+}
+
+.settings-menu
+{
+    width: 120px;
+    font-size: 1.1em;
+    margin-right: 48px;
+
+    span[class^="fa"],
+    span[class^="fas"],
+    span[class^="glyphicon"]
+    {
+        margin-right: var(--size-sm);
+    }
+}
+
+.settings-items
+{
+    width: 300px;
+    display: grid;
+    grid-template-columns: auto 160px;
+    grid-template-rows: auto;
+    column-gap: var(--size-sm);
+    row-gap: var(--size-sm);
+    align-items: center;
+}
