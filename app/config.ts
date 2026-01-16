@@ -21,6 +21,32 @@ export interface LanguageDef
     name: string;
 }
 
+/**
+ * Configuration of keycloak
+ */
+export interface SettingsKeycloakConfiguration
+{
+    /**
+     * Url address where is keycloak located
+     */
+    oauthServerUrl: string;
+
+    /**
+     * Name of keycloak realm to authenticate to
+     */
+    keycloakRealm: string;
+
+    /**
+     * Name of keycloak client to authenticate to
+     */
+    keycloakClient: string;
+
+    /**
+     * Default redirect URI
+     */
+    redirectUri: string;
+}
+
 export interface SettingsConfiguration
 {
     /**
@@ -52,6 +78,11 @@ export interface SettingsConfiguration
      * Available languages for application
      */
     languages: LanguageDef[];
+
+    /**
+     * Keycloak configuration
+     */
+    keycloak: SettingsKeycloakConfiguration;
 
     /**
      * Indication whether disable mock logger

@@ -22,7 +22,14 @@
                 "lang": "sk",
                 "name": "Slovenčina"
             }
-        ]
+        ],
+        "keycloak":
+        {
+            "oauthServerUrl": "https://keycloak/",
+            "keycloakRealm": "realm",
+            "keycloakClient": "client",
+            "redirectUri": "http://localhost:8888/"
+        }
     },
     "general":
     {

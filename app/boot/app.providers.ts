@@ -1,4 +1,4 @@
-import {FactoryProvider, ClassProvider, ValueProvider, Provider, ExistingProvider, EnvironmentProviders, inject, importProvidersFrom, provideAppInitializer} from '@angular/core';
+import {FactoryProvider, ClassProvider, ValueProvider, Provider, ExistingProvider, EnvironmentProviders, inject, importProvidersFrom, provideAppInitializer, provideZonelessChangeDetection, NgZone} from '@angular/core';
 import {provideClientHydration} from '@angular/platform-browser';
 import {provideHttpClient, withInterceptors} from '@angular/common/http';
 import {provideRouter, withComponentInputBinding} from '@angular/router';
@@ -25,9 +25,11 @@ import {DATE_API} from '@anglr/datetime';
 import {DateFnsDateApi, DateFnsLocale, DATE_FNS_DATE_API_OBJECT_TYPE, DATE_FNS_FORMAT_PROVIDER, DATE_FNS_LOCALE} from '@anglr/datetime/date-fns';
 import {LoggerMiddleware, MockLoggerMiddleware, provideMockLogger, provideRestMethodMiddlewares, ReportProgressMiddleware, ResponseTypeMiddleware, RestMiddlewareType} from '@anglr/rest';
 import {provideRestDateTime} from '@anglr/rest/datetime';
-import {isString} from '@jscrpt/common';
+import {Action1, isString} from '@jscrpt/common';
 import {MissingTranslationHandler, TranslateLoader, TranslateModule} from '@ngx-translate/core';
+import {createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, includeBearerTokenInterceptor, provideKeycloak} from 'keycloak-angular';
 import {sk} from 'date-fns/locale';
+import Keycloak from 'keycloak-js';
 
 import {routes} from './app.component.routes';
 import {config} from '../config';
@@ -41,6 +43,11 @@ import {RestMockLoggerService} from '../services/api/restMockLogger';
 import {ReportMissingTranslationService} from '../services/missingTranslation';
 import {VersionUpdateService} from '../services/versionUpdate';
 import {StaticBuildTranslateLoaderService} from '../services/staticBuildTranslateLoader';
+
+const urlCondition = createInterceptorCondition<IncludeBearerTokenCondition>({
+    urlPattern: /^.*?$/i,
+    bearerPrefix: 'Bearer',
+});
 
 /**
  * Array of providers that are used in app module
@@ -64,7 +71,29 @@ export const appProviders: (Provider|EnvironmentProviders)[] =
                           suppressAuthInterceptor,
                           authInterceptor,
                           progressInterceptor,
+                          includeBearerTokenInterceptor,
                       ])),
+
+    //######################### ZONELESS #########################
+    provideZonelessChangeDetection(),
+
+    //######################### KEYCLOAK #########################
+
+    {
+        provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
+        useValue: [urlCondition],
+    },
+
+    provideKeycloak(
+        {
+            config:
+            {
+                url: config.configuration.keycloak.oauthServerUrl,
+                realm: config.configuration.keycloak.keycloakRealm,
+                clientId: config.configuration.keycloak.keycloakClient,
+            },
+        }
+    ),
 
     //######################### TRANSLATIONS #########################
     importProvidersFrom(TranslateModule.forRoot(
@@ -127,22 +156,74 @@ export const appProviders: (Provider|EnvironmentProviders)[] =
     provideAppInitializer(async () =>
     {
         const authService = inject(AuthenticationService);
-        const swUpdate = inject(VersionUpdateService);
+            const swUpdate = inject(VersionUpdateService);
+            const keycloak = inject(Keycloak);
+            const zone = inject(NgZone);
 
-        await swUpdate.initialize();
+            await swUpdate.initialize();
 
-        try
-        {
-            await authService
-                .getUserIdentity();
+            function keycloakInit(): Promise<void>
+            {
+                let resolveFn: Action1<void>;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                let rejectFn: Action1<any>;
+
+                const result = new Promise<void>((resolve, reject) =>
+                {
+                    resolveFn = resolve;
+                    rejectFn = reject;
+                });
+
+                zone.runOutsideAngular(async () =>
+                {
+                    try
+                    {
+                        await keycloak.init(
+                        {
+                            onLoad: 'check-sso',
+                            silentCheckSsoRedirectUri: window.location.origin + '/keycloak.html',
+                            silentCheckSsoFallback: false,
+                            // responseMode: 'query',
+                            checkLoginIframe: false,
+                            // enableLogging: true,
+                        });
+
+                        if(!await keycloak.authenticated)
+                        {
+                            await keycloak.login();
+                        }
+                    }
+                    catch(e)
+                    {
+                        console.log('Problem with keycloak init', e);
+                        rejectFn(e);
+
+                        return;
+                    }
+
+                    resolveFn();
+                });
+
+                return result;
+            }
+
+            try
+            {
+                await keycloakInit();
+                console.log('keycloak initialized');
+                // await codeListsCache.initialize();
+
+                await authService
+                    .getUserIdentity();
+            }
+            catch(e)
+            {
+                alert(`Authentication failed: ${e}`);
+
+                throw e;
+            }
         }
-        catch(e)
-        {
-            alert(`Authentication failed: ${e}`);
-
-            throw e;
-        }
-    }),
+    ),
 
     //######################### GRID GLOBAL OPTIONS #########################
     provideGridInitializerType(QueryGridInitializerComponent),
